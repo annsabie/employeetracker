@@ -5,6 +5,7 @@ const mysql = require("mysql2");
 const { response } = require("express");
 const PORT = process.env.PORT || 3001;
 const app = express();
+const cTable = require("console.table");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -34,32 +35,35 @@ function start() {
                 "Update an employee role"
             ],
             name: "mainmenu",   
-        },
+        }
         
     )
     .then((answers) => {
-        if (answers = "Add a department") {
+
+        const {userChoice} = answers;
+        
+        if (userChoice === "Add a department") {
             addDepartment();
         }
-        if (answers = "Add a role") {
+        if (userChoice = "Add a role") {
             addRole();
         }
-        if (answers = "Add an employee") {
+        if (userChoice = "Add an employee") {
             addEmployee();
         }
-        if (answers = "View all departments") {
+        if (userChoice = "View all departments") {
             showDepartments();
         }
-        if (answers = "View all roles") {
+        if (userChoice = "View all roles") {
             showRoles();
         }
-        if (answers = "View all employees") {
+        if (userChoice = "View all employees") {
             showEmployees();
         }
-        if (answers = "Update an employee role") {
-            updateEmployee
+        if (userChoice = "Update an employee role") {
+            updateEmployee();
         }
-    })
+    });
 };
 
 function addDepartment() {
@@ -77,7 +81,7 @@ function addDepartment() {
         },
     )
 
-    .then((answers) => {
+    .then(answer => {
         app.post("/api/department/:name", (req, res) => {
             db.query("INSERT INTO department(name) VALUES(${})", req.body.name, (err, result) => {
               if( err ) return res.status(400).json(err)
@@ -90,5 +94,88 @@ function addDepartment() {
 
 
 };
+
+function addRole() {
+    app.get("/api/role", (req, res) => {
+        db.query("SELECT * from role", (err, results) => {
+          if( err ) return res.status(400).json(err)
+          res.json(results)
+        })
+      });
+    inquirer.prompt (
+        {
+            type: "input",
+            message: "What is the name of the role?",
+            name: "addRole"
+        },
+    )
+
+    .then((answers) => {
+        app.post("/api/department/:title", (req, res) => {
+            db.query("INSERT INTO role(title) VALUES(${})", req.body.name, (err, result) => {
+              if( err ) return res.status(400).json(err)
+              res.json("Role added!")
+            })
+          });
+    })
+    
+   start()
+
+
+};
+
+function addEmployee() {
+    app.get("/api/employee", (req, res) => {
+        db.query("SELECT * from employee", (err, results) => {
+          if( err ) return res.status(400).json(err)
+          res.json(results)
+        })
+      });
+    inquirer.prompt (
+        {
+            type: "input",
+            message: "What is the first name of the employee?",
+            name: "addFirstName"
+        },
+        {
+            type: "input",
+            message: "What is the last name of the employee?",
+            name: "addLastName"
+        },
+        {
+            type: "input",
+            message: "What is their role id?",
+            name: "addRoleId"
+        },
+        {
+            type: "input",
+            message: "What is the manager id for this employee?",
+            name: "addManagerId"
+
+        }
+    )
+
+    .then((answers) => {
+        app.post("/api/department/:name", (req, res) => {
+            db.query("INSERT INTO department(name) VALUES(${})", req.body.name, (err, result) => {
+              if( err ) return res.status(400).json(err)
+              res.json("Department added!")
+            })
+          });
+    })
+    
+   start()
+
+
+};
+
+function showDepartments() {
+    app.get("/api/department", (req, res) => {
+        db.query("SELECT * from department", (err, results) => {
+          if( err ) return res.status(400).json(err)
+          res.json(results)
+        })
+      }); 
+}
 
 start()
