@@ -34,7 +34,7 @@ function start() {
                 "Add a department",
                 "Add a role",
                 "Add an employee",
-                "Update an employee role"
+                "Update an employee"
             ],
             name: "mainmenu",   
         }
@@ -78,7 +78,7 @@ function viewDepartments() {
 };
 
 function viewRoles() {
-    db.query("SELECT title AS title FROM role", (err,results) => {
+    db.query("SELECT title AS title, id AS id, department_id AS department FROM role", (err,results) => {
         if (err) throw err 
         console.table(results)
         start()
@@ -189,40 +189,26 @@ function updateEmployee() {
     inquirer.prompt ([
         {
             type: "input",
-            message: "What is the first name of the employee?",
-            name: "addFirstName"
+            message: "Please enter the employee id you want to update",
+            name: "emId"
         },
         {
             type: "input",
-            message: "What is the last name of the employee?",
-            name: "addLastName"
-        },
-        {
-            type: "input",
-            message: "What is their role id?",
-            name: "addRoleId"
-        },
-        {
-            type: "input",
-            message: "What is the manager id for this employee?",
-            name: "addManagerId"
-
+            message: "What is the new role id for this employee?",
+            name: "newRole"
         }
     ])
     .then((answer) => {
-        db.query("INSERT INTO employee SET ?", {
-            first_name: answer.addFirstName,
-            last_name: answer.addLastName,
-            role_id: answer.addRoleId,
-            manager_id: answer.addManagerId
-        },
+        db.query("UPDATE employee SET role_id=? WHERE id=?", [answer.newRole, answer.emId],
         function (err) {
             if (err) throw err;
-            console.log("Employee has been added!");
+            console.log("Employee has been updated!");
             start()
         }
         )
     })
-}
+}    
+    
+
 
 start();
