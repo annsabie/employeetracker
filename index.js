@@ -6,19 +6,21 @@ const { response } = require("express");
 const PORT = process.env.PORT || 3001;
 const app = express();
 const cTable = require("console.table");
+require('dotenv').config();
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 const db = mysql.createConnection(
-  {
-    host: "localhost",
-    user: "root",
-    password: "karyssa69",
-    database: "employees_db"
-  },
-  console.log(`Connected to the employees_db database.`)
-);
+    {
+      host: "localhost",
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+    },
+    console.log(`Connected to the employees_db database.`)
+  );
+  
 
 function start() {
     inquirer.prompt ([
@@ -58,6 +60,9 @@ function start() {
         }
         if (mainmenu === "Add an employee") {
             addEmployee();
+        }
+        if (mainmenu === "Update an employee") {
+            updateEmployee();
         };
 
     });
@@ -141,7 +146,7 @@ function addRole() {
 }
 
 function addEmployee() {
-    inquirer.prompt (
+    inquirer.prompt ([
         {
             type: "input",
             message: "What is the first name of the employee?",
@@ -163,21 +168,61 @@ function addEmployee() {
             name: "addManagerId"
 
         }
-    )
+    ])
     .then((answer) => {
-        db.query("INSERT INTO role SET ?", {
-            title: answer.addRoleTitle,
-            salary: answer.addSalary,
-            department_id: answer.addDepartmentId,
+        db.query("INSERT INTO employee SET ?", {
+            first_name: answer.addFirstName,
+            last_name: answer.addLastName,
+            role_id: answer.addRoleId,
+            manager_id: answer.addManagerId
         },
         function (err) {
             if (err) throw err;
-            console.log("Role has been added!");
+            console.log("Employee has been added!");
             start()
         }
         )
     })
 }
 
+function updateEmployee() {
+    inquirer.prompt ([
+        {
+            type: "input",
+            message: "What is the first name of the employee?",
+            name: "addFirstName"
+        },
+        {
+            type: "input",
+            message: "What is the last name of the employee?",
+            name: "addLastName"
+        },
+        {
+            type: "input",
+            message: "What is their role id?",
+            name: "addRoleId"
+        },
+        {
+            type: "input",
+            message: "What is the manager id for this employee?",
+            name: "addManagerId"
+
+        }
+    ])
+    .then((answer) => {
+        db.query("INSERT INTO employee SET ?", {
+            first_name: answer.addFirstName,
+            last_name: answer.addLastName,
+            role_id: answer.addRoleId,
+            manager_id: answer.addManagerId
+        },
+        function (err) {
+            if (err) throw err;
+            console.log("Employee has been added!");
+            start()
+        }
+        )
+    })
+}
 
 start();
