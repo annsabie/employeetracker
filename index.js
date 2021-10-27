@@ -21,7 +21,7 @@ const db = mysql.createConnection(
 );
 
 function start() {
-    inquirer.prompt (
+    inquirer.prompt ([
         {
             type: "list",
             message: "What would you like to do?",
@@ -37,42 +37,58 @@ function start() {
             name: "mainmenu",   
         }
         
-    )
+    ])
     .then((answers) => {
+        const { mainmenu} = answers;
 
-        const {userChoice} = answers;
-        
-        if (userChoice === "Add a department") {
+        if (mainmenu === "View all departments") {
+            viewDepartments();
+        }
+        if (mainmenu === "View all roles") {
+            viewRoles();
+        }
+        if (mainmenu === "View all employees") {
+            viewEmployees();
+        }
+        if (mainmenu === "Add a department") {
             addDepartment();
         }
-        if (userChoice = "Add a role") {
+        if (mainmenu === "Add a role") {
             addRole();
         }
-        if (userChoice = "Add an employee") {
+        if (mainmenu === "Add an employee") {
             addEmployee();
-        }
-        if (userChoice = "View all departments") {
-            showDepartments();
-        }
-        if (userChoice = "View all roles") {
-            showRoles();
-        }
-        if (userChoice = "View all employees") {
-            showEmployees();
-        }
-        if (userChoice = "Update an employee role") {
-            updateEmployee();
-        }
+        };
+
     });
+
 };
 
-function addDepartment() {
-    app.get("/api/department", (req, res) => {
-        db.query("SELECT * from department", (err, results) => {
-          if( err ) return res.status(400).json(err)
-          res.json(results)
+function viewDepartments() {
+    db.query("SELECT id AS id, name AS department FROM department", (err,results) => {
+        if (err) throw err 
+        console.table(results)
+        start()
         })
-      });
+};
+
+function viewRoles() {
+    db.query("SELECT title AS title FROM role", (err,results) => {
+        if (err) throw err 
+        console.table(results)
+        start()
+        })
+};
+
+function viewEmployees() {
+    db.query("SELECT id, first_name, last_name, role_id, manager_id FROM employee", (err,results) => {
+        if (err) throw err 
+        console.table(results)
+        start()
+        })
+}
+
+function addDepartment() {
     inquirer.prompt (
         {
             type: "input",
@@ -81,101 +97,81 @@ function addDepartment() {
         },
     )
 
-    .then(answer => {
-        app.post("/api/department/:name", (req, res) => {
-            db.query("INSERT INTO department(name) VALUES(${})", req.body.name, (err, result) => {
-              if( err ) return res.status(400).json(err)
-              res.json("Department added!")
-            })
-          });
+    .then((answer) => {
+        db.query("INSERT INTO department SET ?",{name: answer.addDepartmentName}, (err,results) => {
+        if (err) throw err
+        console.log("Department has been added!");
+        start();
+        })
     })
     
-   
-
-
-};
+}
 
 function addRole() {
-    app.get("/api/role", (req, res) => {
-        db.query("SELECT * from role", (err, results) => {
-          if( err ) return res.status(400).json(err)
-          res.json(results)
-        })
-      });
-    inquirer.prompt (
+    inquirer.prompt ([
         {
             type: "input",
             message: "What is the name of the role?",
-            name: "addRole"
-        },
-    )
-
-    .then((answers) => {
-        app.post("/api/department/:title", (req, res) => {
-            db.query("INSERT INTO role(title) VALUES(${})", req.body.name, (err, result) => {
-              if( err ) return res.status(400).json(err)
-              res.json("Role added!")
-            })
-          });
-    })
-    
-   start()
-
-
-};
-
-function addEmployee() {
-    app.get("/api/employee", (req, res) => {
-        db.query("SELECT * from employee", (err, results) => {
-          if( err ) return res.status(400).json(err)
-          res.json(results)
-        })
-      });
-    inquirer.prompt (
-        {
-            type: "input",
-            message: "What is the first name of the employee?",
-            name: "addFirstName"
+            name: "addRoleTitle"
         },
         {
             type: "input",
-            message: "What is the last name of the employee?",
-            name: "addLastName"
+            message: "What is this role's salary?",
+            name: "addSalary"
         },
         {
             type: "input",
-            message: "What is their role id?",
-            name: "addRoleId"
-        },
-        {
-            type: "input",
-            message: "What is the manager id for this employee?",
-            name: "addManagerId"
-
+            message: "What is this role's department id?",
+            name: "addDepartmentId"
         }
-    )
-
-    .then((answers) => {
-        app.post("/api/department/:name", (req, res) => {
-            db.query("INSERT INTO department(name) VALUES(${})", req.body.name, (err, result) => {
-              if( err ) return res.status(400).json(err)
-              res.json("Department added!")
-            })
-          });
+    ])
+    .then((answer) => {
+        db.query("INSERT INTO role SET ?", {
+            title: answer.addRoleTitle,
+            salary: answer.addSalary,
+            department_id: answer.addDepartmentId,
+        },
+        function (err) {
+            if (err) throw err;
+            console.log("Role has been added!");
+            start()
+        }
+        )
     })
-    
-   start()
-
-
-};
-
-function showDepartments() {
-    app.get("/api/department", (req, res) => {
-        db.query("SELECT * from department", (err, results) => {
-          if( err ) return res.status(400).json(err)
-          res.json(results)
-        })
-      }); 
 }
 
-start()
+function addEmployee() {
+    inquirer.prompt ([
+        {
+            type: "input",
+            message: "What is the name of the role?",
+            name: "addRoleTitle"
+        },
+        {
+            type: "input",
+            message: "What is this role's salary?",
+            name: "addSalary"
+        },
+        {
+            type: "input",
+            message: "What is this role's department id?",
+            name: "addDepartmentId"
+        }
+    ])
+    .then((answer) => {
+        db.query("INSERT INTO role SET ?", {
+            title: answer.addRoleTitle,
+            salary: answer.addSalary,
+            department_id: answer.addDepartmentId,
+        },
+        function (err) {
+            if (err) throw err;
+            console.log("Role has been added!");
+            start()
+        }
+        )
+    })
+}
+
+
+start();
