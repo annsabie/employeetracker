@@ -141,23 +141,29 @@ function addRole() {
 }
 
 function addEmployee() {
-    inquirer.prompt ([
+    inquirer.prompt (
         {
             type: "input",
-            message: "What is the name of the role?",
-            name: "addRoleTitle"
+            message: "What is the first name of the employee?",
+            name: "addFirstName"
         },
         {
             type: "input",
-            message: "What is this role's salary?",
-            name: "addSalary"
+            message: "What is the last name of the employee?",
+            name: "addLastName"
         },
         {
             type: "input",
-            message: "What is this role's department id?",
-            name: "addDepartmentId"
+            message: "What is their role id?",
+            name: "addRoleId"
+        },
+        {
+            type: "input",
+            message: "What is the manager id for this employee?",
+            name: "addManagerId"
+
         }
-    ])
+    )
     .then((answer) => {
         db.query("INSERT INTO role SET ?", {
             title: answer.addRoleTitle,
